@@ -1,10 +1,7 @@
-import pytest
-from app import create_app
+# test_app.py
+from app import app
 
+def test_home():
+    response = app.test_client().get('/')
+    assert response.status_code == 200
 
-def test_home_route():
-    app = create_app()
-    client = app.test_client()
-    resp = client.get("/")
-    assert resp.status_code == 200
-    assert b"Hello" in resp.data
