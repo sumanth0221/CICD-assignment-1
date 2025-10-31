@@ -1,10 +1,20 @@
-from flask import Flask, jsonify
+# imports...
+from flask import Flask
 
-app = Flask(__name__)
+# (E302) make sure there are TWO blank lines before any top-level def/class
 
-@app.route('/api/message', methods=['GET'])
-def get_message():
-    return jsonify({'message': 'Hello from Flask!'}), 200
+def create_app():
+    app = Flask(__name__)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    @app.route("/")
+    def home():
+        return "Hello, CI/CD!"
+
+    return app
+
+
+# (E305) ensure TWO blank lines after a function/class *before* the next top-level block
+
+if __name__ == "__main__":
+    app = create_app()
+    app.run(host="0.0.0.0", port=5000)

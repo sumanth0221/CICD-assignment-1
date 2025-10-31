@@ -1,7 +1,10 @@
-from app import app
+import pytest
+from app import create_app
 
-def test_get_message():
-    with app.test_client() as client:
-        response = client.get('/api/message')
-        assert response.status_code == 200
-        assert response.json == {'message': 'Hello from Flask!'}
+
+def test_home_route():
+    app = create_app()
+    client = app.test_client()
+    resp = client.get("/")
+    assert resp.status_code == 200
+    assert b"Hello" in resp.data
