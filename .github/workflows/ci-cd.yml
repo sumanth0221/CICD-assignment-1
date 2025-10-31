@@ -1,0 +1,59 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend_flask:
+    name: Backend (Flask) - Lint & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install flake8 pytest
+
+      - name: Lint Python code
+        run: |
+          if [ -f .flake8 ] || [ -f setup.cfg ] || [ -f tox.ini ] || [ -f .pep8 ]; then
+            flake8 .
+          else
+            echo "No lint configuration found, skipping linting."
+          fi
+
+      - name: Run Python tests
+        run: |
+          if [ -f pytest.ini ] || ls tests 2>/dev/null; then
+            pytest -q
+          else
+            echo "No tests found, skipping tests."
+          fi
+
+  deploy:
+    name: Deploy - Build & Push Docker Image
+    needs: backend_flask
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_ACCESS_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/backend_flask:latest .
+
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/backend_flask:latest
